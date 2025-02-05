@@ -6,12 +6,12 @@
 #include <openssl/evp.h>
 
 
-
-// Initialization
-
+// Initialization of Authentication
 int Login();
 void Logout();
 int Signup();
+
+// Initialization of Pages
 void mainscreen();
 void Dashboard();
 void CheckStocks();
@@ -28,13 +28,98 @@ void main(){
 // Pages
 
 void CheckStocks(){
+    char choice[1];
     system("clear");
     printf("Check Stocks :\n");
     printf("SN \t Name \t\t\t\t Quantity \n");
+    
+    printf("No stocks found. \n");
+
+
+
+
+
+    printf("Press d to go to dashboard \n");
+    printf("Press l to logout \n");
+    
+    scanf("%c",choice);
+    switch (choice[0])
+    {
+    case 'd':
+        /* code */
+        Dashboard();
+    case 'l':
+        Logout();
+
+    default:
+        CheckStocks();
+    }
 }
 void AddStocks(){
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+    int rc=sqlite3_open("users.db",&db);
+    char name[50];
+    int choice
+    int quantity,unit_price;
     system("clear");
     printf("Add Stocks : \n");
+    printf("Enter Item Name : ");
+    scanf("%s",name);
+    printf("Enter Quantity : ");
+    scanf("%d",&quantity);
+    printf("Enter unit Price : ");
+    scanf("%d",&unit_price);
+
+     const char *sql="CREATE TABLE IF NOT EXISTS Stocks("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "Name TEXT UNIQUE NOT NULL,"
+                    "Quantity INTEGER NOT NULL,"
+                    "UnitPrice INTEGER NOT NULL);";
+    char *errMsg = NULL;
+    rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
+    if (rc != SQLITE_OK) {
+        printf("Error creating table: %s\n", errMsg);
+        sqlite3_free(errMsg);
+    } else {
+        printf("Table checked/created successfully.\n");
+        const char *sql ="INSERT INTO Stocks (Name,Quantity,UnitPrice) VALUES (?,?,?)";
+        sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+        sqlite3_bind_text(stmt, 1, name, -1, SQLITE_STATIC);
+        sqlite3_bind_int(stmt, 2, quantity);
+        sqlite3_bind_int(stmt, 3, unit_price);
+
+        // Executing SQL statement
+        rc = sqlite3_step(stmt);
+        if (rc == SQLITE_DONE) {
+            printf("Data Added Sucessfully!\n");
+        } else {
+            printf("Error: %s\n", sqlite3_errmsg(db));
+        }
+
+        // Cleanup
+        sqlite3_finalize(stmt);
+    }
+
+    printf("1. Dashboard \n");
+    printf("2. Add Stocks \n");
+    
+    scanf("%d",choice);
+    switch (choice)
+    {
+    case 1:
+        /* code */
+        Dashboard();
+    case 2:
+        AddStocks();
+
+    default:
+        Dashboard();
+        printf("Default");
+    
+    }
+
+
 }
 void SellStocks(){
     system("clear");
@@ -50,7 +135,7 @@ void Dashboard(){
     system("clear");
     int choice;
     printf("Welcome to Dashboard of Recordex! \n");
-    printf("1. Check Stocks \n 2. Add Stocks \n 3. Sell Stocks \n 4. Logout \n");
+    printf(" 1. Check Stocks \n 2. Add Stocks \n 3. Sell Stocks \n 4. Logout \n");
     printf("Enter your choice ( number )");
     scanf("%d",&choice);
 
@@ -250,14 +335,16 @@ int Login(){
 
     // login logic
     if (sqlite3_step(stmt) == SQLITE_ROW) {
+        sqlite3_finalize(stmt);
         printf("\nLogin successful!");
+        Dashboard();
     } else {
         printf("Invalid credentials.\n");
-        printf("%s",stmt);
+        // printf("%s",stmt);
     }
 
     // cleanup
-    sqlite3_finalize(stmt);
+    
 
     return 0;
 }
