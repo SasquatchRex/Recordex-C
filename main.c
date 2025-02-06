@@ -27,15 +27,33 @@ void main(){
 
 // Pages
 
+// Callback function to handle query results
+int callback(void *NotUsed, int argc, char **argv, char **azColName) {
+
+    printf("%-5d | %-20s | %-10d | %-10d\n", atoi(argv[0]),argv[1],atoi(argv[2]),atoi(argv[3]));
+    
+    
+    return 0;
+}
+
 void CheckStocks(){
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+    int rc=sqlite3_open("users.db",&db);
     char choice[1];
     system("clear");
     printf("Check Stocks :\n");
     printf("SN \t Name \t\t\t\t Quantity \n");
     
-    printf("No stocks found. \n");
-
-
+    // printf("No stocks found. \n");
+    const char *sql="SELECT * FROM Stocks;";
+    char *errMsg = NULL;
+    rc = sqlite3_exec(db, sql, callback, 0, &errMsg);
+    if (rc != SQLITE_OK) {
+        printf("Error retriving data: %s\n", errMsg);
+        sqlite3_free(errMsg);
+    }
+    
 
 
 
@@ -46,7 +64,6 @@ void CheckStocks(){
     switch (choice[0])
     {
     case 'd':
-        /* code */
         Dashboard();
     case 'l':
         Logout();
@@ -60,7 +77,7 @@ void AddStocks(){
     sqlite3_stmt *stmt;
     int rc=sqlite3_open("users.db",&db);
     char name[50];
-    int choice
+    int choice;
     int quantity,unit_price;
     system("clear");
     printf("Add Stocks : \n");
@@ -104,7 +121,7 @@ void AddStocks(){
     printf("1. Dashboard \n");
     printf("2. Add Stocks \n");
     
-    scanf("%d",choice);
+    scanf("%d",&choice);
     switch (choice)
     {
     case 1:
@@ -127,7 +144,7 @@ void SellStocks(){
 }
 
 void Logout(){
-    printf("logoue");
+    mainscreen();
 }
 
 
