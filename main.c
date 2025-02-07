@@ -156,7 +156,8 @@ void SellStocks()
     sqlite3_stmt *stmt2;
     int num, quantity;
     char name[50];
-    const char *sql = "UPDATE Stocks SET Quantity = Quantity - ? WHERE Name = ? RETURNING UnitPrice";
+    int choice;
+    // const char *sql = "UPDATE Stocks SET Quantity = Quantity - ? WHERE Name = ? RETURNING UnitPrice";
     const char *select_sql = "SELECT UnitPrice FROM Stocks WHERE Name = ?";
     const char *update_sql = "UPDATE Stocks SET Quantity = Quantity - ? WHERE Name = ?";
 
@@ -228,8 +229,46 @@ void SellStocks()
         Stocks_billing[i].quantity = quantity;
         Stocks_billing[i].unitprice = unit_price;
 
-        printf("%s \t %d \t %d",name,quantity,unit_price);
+        // printf("%s \t %d \t %d",name,quantity,unit_price);
     }
+
+    system("clear");
+    int amount =0;
+    
+
+    printf("Bill :  \n");
+    printf("------------------------------------------------------------------------\n");
+    printf("%-5s | %-20s | %-10s | %-10s | %-20s\n","SN","Name","Quantity","Rate","Amount");
+    for(int i=1;i<=num;i++){
+        amount += Stocks_billing[i].quantity*Stocks_billing[i].unitprice;
+        printf("%-5d | %-20s | %-10d | %-10d | %-20d\n",i,Stocks_billing[i].name,Stocks_billing[i].quantity,Stocks_billing[i].unitprice,Stocks_billing[i].quantity*Stocks_billing[i].unitprice);
+    
+    }
+    printf("------------------------------------------------------------------------\n");
+    printf("%-5s | %-20s | %-10s | %-10s | %-20d\n","","","","Total",amount);
+    printf("------------------------------------------------------------------------\n");
+
+    goto_default:
+
+    printf("1. Sell Stocks\n2.Dashboard\n");
+    printf("Enter choice : ");
+    scanf("%d",&choice);
+
+    switch (choice)
+    {
+    case 1:
+        SellStocks();
+        break;
+    case 2:
+        Dashboard();
+        break;
+    
+    default:
+        goto goto_default;
+        break;
+    }
+
+
     Dashboard();
 
 
